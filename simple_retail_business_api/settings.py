@@ -25,7 +25,7 @@ SECRET_KEY = '^*z@3n2p)1vh%ydb&0enj!km06o)dy&6apuy9zbf5_jj-2o@v$'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['testserver', '127.0.0.1']
 
 
 # Application definition
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'rest_auth',
+    'corsheaders',
     'django_rest_passwordreset',
 ]
 
@@ -68,6 +69,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -97,6 +99,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'simple_retail_business_api.wsgi.application'
 
+CORS_ALLOWED_ORIGINS = [
+    'http://127.0.0.1:3000',
+]
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
