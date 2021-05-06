@@ -107,6 +107,10 @@ class SaleSerializer(serializers.ModelSerializer):
         }
     )
 
+    sold = serializers.ReadOnlyField(
+        source='get_amount_sold'
+    )
+
     exit = serializers.SlugRelatedField(queryset=Exit.objects.all(),
 		slug_field='pk', required=True, error_messages = {
             'does_not_exist': _("Exit with id {value} doesn't exit"),
@@ -120,6 +124,7 @@ class SaleSerializer(serializers.ModelSerializer):
             'exit',
             'product',
             'amount',
+            'sold',
         )
 
     def validate_amount(self, amount):
@@ -153,6 +158,10 @@ class PurchaseSerializer(serializers.ModelSerializer):
         }
     )
 
+    spent = serializers.ReadOnlyField(
+        source='get_amount_spent'
+    )
+
     entry = serializers.SlugRelatedField(queryset=Entry.objects.all(),
 		slug_field='pk', required=True, error_messages = {
             'does_not_exist': _("Entry with id {value} doesn't exit"),
@@ -166,6 +175,7 @@ class PurchaseSerializer(serializers.ModelSerializer):
             'entry',
             'product',
             'amount',
+            'spent',
         )
 
     def validate_amount(self, amount):
@@ -181,12 +191,22 @@ class ExitSerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.ReadOnlyField(source='user.username')
     exit_sales = SaleSerializer(many=True, read_only=True)
 
+    units_sold = serializers.ReadOnlyField(
+        source='get_units_sold'
+    )
+
+    total_sold = serializers.ReadOnlyField(
+        source='total_amount_sold'
+    )
+
     class Meta:
         model = Exit
         fields = (
             'pk',
             'created_date',
             'user',
+            'units_sold',
+            'total_sold',
             'exit_sales'
         )    
         read_only_fields = ('created_date', 'user')
@@ -202,6 +222,14 @@ class EntrySerializer(serializers.HyperlinkedModelSerializer):
     )
     entry_purchases = PurchaseSerializer(many=True, read_only=True)
 
+    units_bought = serializers.ReadOnlyField(
+        source='get_units_bought'
+    )
+
+    total_spent = serializers.ReadOnlyField(
+        source='total_amount_spent'
+    )
+
     class Meta:
         model = Entry
         fields = (
@@ -209,6 +237,8 @@ class EntrySerializer(serializers.HyperlinkedModelSerializer):
             'created_date',
             'user',
             'provider',
+            'units_bought',
+            'total_spent',
             'entry_purchases'
         )    
         read_only_fields = ('created_date', 'user')

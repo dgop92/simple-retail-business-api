@@ -168,14 +168,15 @@ class CorePopulator(TestsMixin, CoreDashboardtUrlDataGetter):
         login_url = reverse(login_view_name)
 
         for user in users:
-            self.post(
-                login_url,
-                data = {
-                    "username": user.username,
-                    "password": "admin1234admin"
-                }
-            )
-            self.tokens.append(self.json_response['key'])
+            if(user.username != 'root'):
+                self.post(
+                    login_url,
+                    data = {
+                        "username": user.username,
+                        "password": "admin1234admin"
+                    }
+                )
+                self.tokens.append(self.json_response['key'])
 
         self.create_entries_purchases()
         self.create_exits_sales()

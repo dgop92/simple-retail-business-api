@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Sum, F, DecimalField
 
 from account.models import MyUser
 from django.db import models
@@ -88,6 +89,16 @@ class Exit(models.Model):
     class Meta:
         ordering = ('created_date', )
 
+    def get_units_sold(self):
+        return self.exit_sales.count()
+    
+    def total_amount_sold(self):
+        return self.exit_sales.aggregate(
+            total_sold=Sum(
+                F('amount') * F('product__sale_price'), output_field=DecimalField()
+            )
+        )['total_sold']
+
 
 class Entry(models.Model):
 
@@ -107,6 +118,16 @@ class Entry(models.Model):
 
     class Meta:
         ordering = ('created_date', )
+
+    def get_units_bought(self):
+        return self.entry_purchases.count()
+    
+    def total_amount_spent(self):
+        return self.entry_purchases.aggregate(
+            total_spent=Sum(
+                F('amount') * F('product__purchase_price'), output_field=DecimalField()
+            )
+        )['total_spent']
 
 class Purchase(models.Model):
 
@@ -128,14 +149,12 @@ class Purchase(models.Model):
     def save(self, *args, **kwargs):
         curr_amount = Purchase.objects.get(pk = self.pk). \
             amount if self.pk else 0
-        print("PS: {0} curr {1} amount {2}".format(
-            self.product.stock,
-            curr_amount,
-            self.amount)
-        )
         self.product.stock = self.product.stock - curr_amount + self.amount
         self.product.save()
         super(Purchase, self).save(*args, **kwargs)
+
+    def get_amount_spent(self):
+        return self.amount * self.product.purchase_price
 
 class Sale(models.Model):
 
@@ -159,4 +178,7 @@ class Sale(models.Model):
         self.product.stock += curr_amount - self.amount
         self.product.save()
         super(Sale, self).save(*args, **kwargs) 
+
+    def get_amount_sold(self):
+        return self.amount * self.product.sale_price
 
